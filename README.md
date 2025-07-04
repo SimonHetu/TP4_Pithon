@@ -12,3 +12,5 @@ instructions pour cloner ce dépôt sur votre machine.
 
 Le fichier [`install.md`](./consignes/install.md) dans les consignes contient les
 instructions pour démarrer l'évaluateur Python.
+
+- Commentaire test pour créer la branche dev initiale
