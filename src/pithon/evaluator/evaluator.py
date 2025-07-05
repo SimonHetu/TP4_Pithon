@@ -3,7 +3,7 @@ from pithon.evaluator.primitive import check_type, get_primitive_dict
 from pithon.syntax import (
     PiAssignment, PiBinaryOperation, PiNumber, PiBool, PiStatement, PiProgram, PiSubscript, PiVariable,
     PiIfThenElse, PiNot, PiAnd, PiOr, PiWhile, PiNone, PiList, PiTuple, PiString,
-    PiFunctionDef, PiFunctionCall, PiFor, PiBreak, PiContinue, PiIn, PiReturn
+    PiFunctionDef, PiFunctionCall,PiClassDef, PiFor, PiBreak, PiContinue, PiIn, PiReturn
 )
 from pithon.evaluator.envvalue import EnvValue, VFunctionClosure, VList, VNone, VTuple, VNumber, VBool, VString
 
@@ -111,6 +111,10 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
         closure = VFunctionClosure(node, env)
         insert(env, node.name, closure)
         return VNone(value=None)
+    
+    elif isinstance(node, PiClassDef):
+        #Implémenter la logique de création de classe ici
+        pass
 
     elif isinstance(node, PiReturn):
         value = evaluate_stmt(node.value, env)
