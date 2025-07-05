@@ -5,7 +5,7 @@ from pithon.syntax import (
     PiIfThenElse, PiNot, PiAnd, PiOr, PiWhile, PiNone, PiList, PiTuple, PiString,
     PiFunctionDef, PiFunctionCall,PiClassDef, PiFor, PiBreak, PiContinue, PiIn, PiReturn
 )
-from pithon.evaluator.envvalue import EnvValue, VFunctionClosure, VList, VNone, VTuple, VNumber, VBool, VString
+from pithon.evaluator.envvalue import EnvValue, VFunctionClosure, VList, VNone, VTuple, VNumber, VBool, VString, VClassDef
 
 
 def initial_env() -> EnvFrame:
@@ -112,9 +112,18 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
         insert(env, node.name, closure)
         return VNone(value=None)
     
-    elif isinstance(node, PiClassDef):
-        #Implémenter la logique de création de classe ici
-        pass
+    elif isinstance(node, PiClassDef): # Fonctionnalité couvrant la définition de classe
+        methods = {} 
+        # Création d'un dictionnaire vide pour contenir les paires nom / VFunctionClosure( fonction et environnement de definition)
+        for method in node.methods:
+        # Boucle sur chaque méthode pour la transformer en fermeture avec son environnement de définition
+            closure = VFunctionClosure(method, env)
+            methods[method.name] = closure
+        class_value = VClassDef(name=node.name, methods=methods) 
+        # Définition d'une valeur VClassDef qui contient le nom de la classe et le dictionnaire des méthodes
+      
+        insert(env, node.name, class_value) # Enregistrement de la classe dans l'environnement sous son nom
+        return VNone(value=None) # Une définition de classe ne retourne pas de valeur mais modifie l'environnement
 
     elif isinstance(node, PiReturn):
         value = evaluate_stmt(node.value, env)
