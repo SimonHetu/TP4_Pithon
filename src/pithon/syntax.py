@@ -105,20 +105,22 @@ class PiSubscript:
     index: 'PiExpression'
 
 @dataclass
-class PiClassDef:
-    name: str
-    methods: list['PiFunctionDef']
+class PiClassDef: # Syntaxe pour la définition de classe
+    name: str # Le nom de la classe sous forme de chaine de caractère
+    methods: list['PiFunctionDef'] 
+    # Liste des  définitions de méthodes contenues dans la classe
+    # Chaque élément est une instance de PiFunctionDef, qui contiendra son propre nom, ses parametres et son corps
 
 @dataclass
-class PiAttribute:
-    object: 'PiExpression'
-    attr: str
+class PiAttribute: # Représente l'accès à la lecture de l'attribut d'un objet
+    object: 'PiExpression' # Expression représentant l'objet
+    attr: str # Nom de l'attribut auquel on veut accéder
 
 @dataclass
-class PiAttributeAssignment:
-    object: 'PiExpression'
-    attr: str
-    value: 'PiExpression'
+class PiAttributeAssignment: # Représente l'assignation d'une valeur à un attribut d'un objet 
+    object: 'PiExpression' # Expression représentant l'objet ciblé
+    attr: str # Nom de l'attribut à modifier ou à créer
+    value: 'PiExpression'# Valeur à attribuer à cet attribut
 
 PiValue = PiNumber | PiBool | PiNone | PiList | PiTuple | PiString
 
