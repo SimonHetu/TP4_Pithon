@@ -129,6 +129,8 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
         obj = evaluate_stmt(node.object, env) # Évalue l'objet ciblé dans l'environnement pour obtenir sa valeur
         if not isinstance(obj, VObject): # Vérifie qu'il sagit bien d'un objet sinon lève une erreur
             raise TypeError("Seuls les objets peuvent avoir des attributs.")
+        if node.attr.startswith("__"):
+            raise AttributeError(f"L'accès à l'attribut réservé '{node.attr}' est interdit.")
         attr = obj.attributes.get(node.attr) # Cherche l'attributs dans le dictionnaire de l'objet
         if attr is None: # Si l'attribut n'existe pas on vérifie si c'est une méthode de la classe
             method = obj.class_def.methods.get(node.attr)
@@ -141,6 +143,8 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
         obj = evaluate_stmt(node.object, env) # Évalue l'objet visé par l'affectation
         if not isinstance(obj, VObject): # Vérifie qu'on travaille bien avec un objet
             raise TypeError("Seuls les objets peuvent avoir des attributs assignés.")
+        if node.attr.startswith("__"):
+            raise AttributeError(f"L'assignation à l'attribut réservé '{node.attr}' est interdite.")
         value = evaluate_stmt(node.value, env) # Évalue la valeur à assigner à l'attribut
         obj.attributes[node.attr] = value # Modifie ou ajoute l'attribut dans le dictionnaire de l'objet
         return value # Retourne la valeur assignée
@@ -168,7 +172,7 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
         return _evaluate_subscript(node, env)
 
     else:
-        raise TypeError(f"Type de nœud non supporté : {type(node)}")
+        raise TypeError(f"Type de nœud non supporté : {type(node).__name__}")
 
 def _check_valid_piandor_type(obj):
     """Vérifie que le type est valide pour 'and'/'or'."""
@@ -215,13 +219,28 @@ def _evaluate_subscript(node: PiSubscript, env: EnvFrame) -> EnvValue:
     # Indexation pour liste, tuple ou chaîne
     if isinstance(collection, VList):
         idx = check_type(index, VNumber)
-        return collection.value[int(idx.value)]
+        try:
+            return collection.value[int(idx.value)]
+        except IndexError:
+            raise IndexError(
+                f"Index {int(idx.value)} hors des bornes pour une liste de taille {len(collection.value)}."
+            )
     elif isinstance(collection, VTuple):
         idx = check_type(index, VNumber)
-        return collection.value[int(idx.value)]
+        try:
+            return collection.value[int(idx.value)]
+        except IndexError:
+            raise IndexError(
+                f"Index {int(idx.value)} hors des bornes pour un tuple de taille {len(collection.value)}."
+            )
     elif isinstance(collection, VString):
         idx = check_type(index, VNumber)
-        return VString(collection.value[int(idx.value)])
+        try:
+            return VString(collection.value[int(idx.value)])
+        except IndexError:
+            raise IndexError(
+                f"Index {int(idx.value)} hors des bornes pour une chaîne de longueur {len(collection.value)}."
+            )
     else:
         raise TypeError("L'indexation n'est supportée que pour les listes, tuples et chaînes.")
 
@@ -312,7 +331,10 @@ def _evaluate_function_call(node: PiFunctionCall, env: EnvFrame) -> EnvValue:
         if i < len(args):
             call_env.insert(arg_name, args[i])
         else:
-            raise TypeError("Argument manquant pour la fonction.")
+            raise TypeError(
+                f"La fonction '{funcdef.name}' attend {len(funcdef.arg_names)} argument(s), "
+                f"mais seulement {len(args)} ont été fournis."
+            )
     if funcdef.vararg:
         varargs = VList(args[len(funcdef.arg_names):])
         call_env.insert(funcdef.vararg, varargs)
