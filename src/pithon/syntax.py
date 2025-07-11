@@ -108,8 +108,8 @@ class PiSubscript:
 class PiClassDef: # Syntaxe pour la définition de classe
     name: str # Le nom de la classe sous forme de chaine de caractère
     methods: list['PiFunctionDef'] 
-    # Liste des  définitions de méthodes contenues dans la classe
-    # Chaque élément est une instance de PiFunctionDef, qui contiendra son propre nom, ses parametres et son corps
+    # Liste des définitions de méthodes contenues dans la classe
+    # Chaque élément est une instance de PiFunctionDef, qui contiendra son propre nom, ses paramètres et son corps
 
 @dataclass
 class PiAttribute: # Représente l'accès à la lecture de l'attribut d'un objet

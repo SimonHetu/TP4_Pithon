@@ -30,6 +30,6 @@ class EnvFrame:
         """
         Retourne une copie superficielle de l'environnement (variables copiées, même parent).
         """
-        newf = EnvFrame(self.parent) # La copie hérite du parent (portée englobante)
+        newf = EnvFrame(self.parent) # Crée un nouveau frame avec le même parent et la même portée extérieure
         newf.vars = self.vars.copy() # Création d'un nouveau dictionnaire avec les mêmes paires clé-valeur
         return newf

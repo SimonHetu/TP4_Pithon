@@ -103,8 +103,8 @@ class VObject:
 
     attributes: dict[str, 'EnvValue'] 
     # Dictionnaire des attributs propres à cette instance
-    # Contient des paires nom valeur pour chaque attribut défini ou assigné sur l'objet
-    # Ce dictionnaire distinct des méthodes de la classe qui sont stockées dans class_def.methods
+    # Contient des paires nom et valeur pour chaque attribut défini ou assigné sur l'objet
+    # Ce dictionnaire est distinct des méthodes de la classe qui sont stockées dans class_def.methods
 
     def __str__(self) -> str: 
     # Méthode spéciale utilisée lors de l'affichage de l'objet 
@@ -117,12 +117,12 @@ class VObject:
         return self.__str__()
 
 @dataclass
-class VMethodClosure: # Permet de lier une fonction de class à une instance contrète comme self
+class VMethodClosure: # Permet de lier une fonction de classe à une instance contrète comme self
     """Représente une méthode liée à une instance."""
     function: VFunctionClosure
     # Fonction définie dans la classe avec son environnement lexical (portée de définition)
     instance: VObject # L'instance à laquelle la méthode est liée, joue le role de 'self' lors de l'appel
-    # Ce qui rend possible le comportement attendu en Python : 
+    # Ce qui rend possible le comportement attendu en Python: 
     # - accès aux attributs de l'objet et partage de l'état
     # - conservation et partage de l'état interne
 

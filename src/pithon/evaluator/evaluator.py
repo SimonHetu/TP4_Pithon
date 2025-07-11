@@ -114,7 +114,7 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
     
     elif isinstance(node, PiClassDef): # Fonctionnalité couvrant la définition de classe
         methods = {} 
-        # Création d'un dictionnaire vide pour contenir les paires nom / VFunctionClosure( fonction et environnement de definition)
+        # Création d'un dictionnaire vide pour contenir les paires nom / VFunctionClosure( fonction et environnement de définition)
         for method in node.methods:
         # Boucle sur chaque méthode pour la transformer en fermeture avec son environnement de définition
             closure = VFunctionClosure(method, env)
@@ -131,13 +131,13 @@ def evaluate_stmt(node: PiStatement, env: EnvFrame) -> EnvValue:
             raise TypeError("Seuls les objets peuvent avoir des attributs.")
         if node.attr.startswith("__"):
             raise AttributeError(f"L'accès à l'attribut réservé '{node.attr}' est interdit.")
-        attr = obj.attributes.get(node.attr) # Cherche l'attributs dans le dictionnaire de l'objet
+        attr = obj.attributes.get(node.attr) # Cherche l'attribut dans le dictionnaire de l'objet
         if attr is None: # Si l'attribut n'existe pas on vérifie si c'est une méthode de la classe
             method = obj.class_def.methods.get(node.attr)
             if method: # Si c'est une méthode on retourne une fermeture liées à l'instance (self)
                 return VMethodClosure(function=method, instance=obj)
             raise AttributeError(f"L'attribut '{node.attr}' est introuvable.") # Si ni un attribut ni une méthode: erreur d'attribut
-        return attr # Retourne la valeur de l'attrivut trouvé dans l'objet (obj.attributes)
+        return attr # Retourne la valeur de l'attribut trouvé dans l'objet (obj.attributes)
     
     elif isinstance(node, PiAttributeAssignment): # Vérifie s'il s'agit d'une assignation à un attribut (objet.attribut = valeur)
         obj = evaluate_stmt(node.object, env) # Évalue l'objet visé par l'affectation
@@ -270,25 +270,23 @@ def _evaluate_function_call(node: PiFunctionCall, env: EnvFrame) -> EnvValue:
         # On récupère la méthode spéciale __init__ pour initialiser l'object
         if init_method:
             bound_method = VMethodClosure(function=init_method, instance=instance)
-            # On crée une méthode liée (méthode + objet auquel elle est liée) qui permet d'utiliser self dans la méthode
+            # On crée une méthode liée à l'objet qui permet d'utiliser self dans la méthode
             call_env = EnvFrame(parent=init_method.closure_env)
             # Création d'un nouvel environnement pour appeler la méthode
-            # son parent est l'environnement de définition de la méthode pour retrouver ses variables de portée
+            # son parent est l'environnement de définition de la méthode pour retrouver ses variables de sa portée
             call_env.insert(init_method.funcdef.arg_names[0], instance)
-            # On insère self (le premier argument) dans l'environnement
-            # qui pointe vers l'instance de l'objet qu'on vient de créer
+            # On insère self (le premier argument) dans l'environnement qui pointe vers l'instance de l'objet qu'on vient de créer
             for name, value in zip(init_method.funcdef.arg_names[1:], args):
                 call_env.insert(name, value)
             # On insère les arguments restants, on saute self et on associe chaque nom d'argument à sa valeur
             if init_method.funcdef.vararg:
                 remaining = args[len(init_method.funcdef.arg_names) - 1:]
                 call_env.insert(init_method.funcdef.vararg, VList(remaining))
-            # S'il y a un argument variable (*args), on récupère les arguments restants 
-            # et on les insère comme une liste
+            # S'il y a un argument variable (*args), on récupère les arguments restants et on les insère comme une liste
             try:
                 for stmt in init_method.funcdef.body:
                     evaluate_stmt(stmt, call_env)
-            # On exécute les instruction de __init__
+            # On exécute les instructions de __init__
             except ReturnException:
                 pass
         # On retourne l'objet instancié
@@ -296,11 +294,9 @@ def _evaluate_function_call(node: PiFunctionCall, env: EnvFrame) -> EnvValue:
     
     if isinstance(func_val, VMethodClosure): # Vérifie si la fonction appelée est une méthode liée à un objet
         call_env = EnvFrame(parent=func_val.function.closure_env)
-        # Crée un nouvel environnement pour l'appel
-        # dont le parent est l'environnement de définition de la méthode
+        # Crée un nouvel environnement pour l'appel dont le parent est l'environnement de définition de la méthode
         call_env.insert(func_val.function.funcdef.arg_names[0], func_val.instance)
-        # Insère 'self' dans l'environnement : le premier argument de la méthode
-        # est lié à l'objet sur lequel la méthode a été appelée
+        # Insère 'self' dans l'environnement: le premier argument de la méthode lié à l'objet sur lequel la méthode a été appelée
         for name, value in zip(func_val.function.funcdef.arg_names[1:], args):
             call_env.insert(name, value)
         # Associe les autres arguments de la méthode avec les valeurs reçues
